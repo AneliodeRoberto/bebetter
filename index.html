@@ -1,0 +1,396 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Rotina EI5A</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky strip of 7 day tabs on top; below it one day as a timeline, with a live "agora" card when the day is today. */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --fg:#13202C; --muted:#5A6A79; --line:#D9E0E7;
+  --escola:#3A6BD1; --treino:#D5472A; --estudo:#7550CC; --criar:#C48A00; --casa:#2C9459; --lazer:#BC4E8C; --rotina:#7B8794;
+  --display:'Bricolage Grotesque',system-ui,sans-serif; --body:'DM Sans',system-ui,sans-serif; --mono:'DM Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F161D; --surface:#17212B; --fg:#E8EEF3; --muted:#93A3B2; --line:#27343F;
+    --escola:#7FA2F0; --treino:#F0795D; --estudo:#A98BEE; --criar:#F0B83A; --casa:#5CC088; --lazer:#E183B7; --rotina:#8C99A6;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F161D; --surface:#17212B; --fg:#E8EEF3; --muted:#93A3B2; --line:#27343F;
+  --escola:#7FA2F0; --treino:#F0795D; --estudo:#A98BEE; --criar:#F0B83A; --casa:#5CC088; --lazer:#E183B7; --rotina:#8C99A6;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--body); font-size:15px; line-height:1.4;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 56px;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+.eyebrow{margin:0;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{margin:2px 0 14px;font-family:var(--display);font-weight:700;font-size:30px;line-height:1.1;letter-spacing:-.01em;text-wrap:balance}
+h2{margin:0;font-family:var(--display);font-weight:700;font-size:24px;line-height:1.15;text-wrap:balance}
+
+.tabsbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:6px 0 10px}
+.tabs{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.tab{
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;min-width:0;
+  background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:10px;font:inherit;cursor:pointer;position:relative;
+}
+.tab .d{font-weight:600;font-size:13px}
+.tab .n{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1}
+.tab .dots{display:flex;gap:3px;height:6px}
+.tab .dots i{width:6px;height:6px;border-radius:50%;display:block}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.tab[aria-selected="true"] .n{color:var(--bg);opacity:.75}
+.tab.today::after{content:"";position:absolute;left:50%;bottom:-6px;width:14px;height:3px;border-radius:2px;background:var(--fg);transform:translateX(-50%)}
+.tab:focus-visible,.row:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.legend{margin:10px 0 0;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+.dayhead{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:500;
+  background:color-mix(in srgb,var(--c) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 30%,var(--line));
+}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--c);display:block}
+.note{margin:0;color:var(--muted);font-size:13px;max-width:62ch}
+
+.nowcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--fg);color:var(--bg);display:grid;gap:4px}
+.nowcard .k{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.nowcard .big{font-family:var(--display);font-weight:700;font-size:20px;line-height:1.2}
+.nowcard .next{font-size:13px;opacity:.85}
+
+.progress{margin:18px 0 6px;display:grid;gap:6px}
+.progress .top{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar b{display:block;height:100%;width:0;background:var(--fg);border-radius:3px;transition:width .25s}
+
+.list{list-style:none;margin:8px 0 0;padding:0}
+.row{
+  position:relative;display:grid;grid-template-columns:46px 14px minmax(0,1fr) 28px;column-gap:10px;align-items:start;width:100%;
+  padding:10px 8px 10px 0;background:none;border:1px solid transparent;border-radius:12px;color:inherit;font:inherit;text-align:left;cursor:pointer;
+}
+.row.static{cursor:default}
+.time{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:1px;font-variant-numeric:tabular-nums}
+.rail{position:relative;align-self:stretch}
+.rail::before{content:"";position:absolute;left:50%;top:-10px;bottom:-10px;width:2px;background:var(--line);transform:translateX(-50%)}
+li:first-child .rail::before{top:6px}
+li:last-child .rail::before{bottom:auto;height:16px}
+.dot{position:absolute;left:50%;top:4px;width:12px;height:12px;border-radius:50%;background:var(--c);transform:translateX(-50%);box-shadow:0 0 0 3px var(--bg)}
+.lbl{font-weight:500;font-size:15px;overflow-wrap:anywhere}
+.meta{font-size:12px;color:var(--muted);margin-top:1px}
+.meta b{font-weight:600;color:var(--c)}
+.sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.check{width:22px;height:22px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;margin-top:1px}
+.check svg{width:12px;height:12px;opacity:0}
+.row.done .check{background:var(--c);border-color:var(--c)}
+.row.done .check svg{opacity:1}
+.row.done .lbl{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.row.now{background:var(--surface);border-color:var(--line)}
+.row.now .dot{box-shadow:0 0 0 3px var(--bg),0 0 0 5px color-mix(in srgb,var(--c) 45%,transparent)}
+.row.now .time{color:var(--fg);font-weight:500}
+.tag{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;background:var(--fg);color:var(--bg);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;vertical-align:1px}
+
+.foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:8px;font-size:13px;color:var(--muted)}
+.foot p{margin:0;max-width:62ch}
+.foot strong{color:var(--fg);font-weight:600}
+@media (prefers-reduced-motion:reduce){.bar b{transition:none}}
+</style>
+
+<div class="wrap">
+  <p class="eyebrow">EI5A2026</p>
+  <h1>A minha semana</h1>
+
+  <div class="tabsbar">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Dias da semana"></div>
+    <p class="legend">
+      <span><i style="background:var(--escola)"></i>Aulas</span>
+      <span><i style="background:var(--treino)"></i>Treino</span>
+      <span>E vídeo empresarial</span>
+      <span>J vídeo de jogos</span>
+      <span>P planear</span>
+    </p>
+  </div>
+
+  <section id="day" aria-live="polite">
+    <div class="dayhead">
+      <h2 id="dayname"></h2>
+      <div class="chips" id="chips"></div>
+      <p class="note" id="daynote" hidden></p>
+    </div>
+    <div class="nowcard" id="nowcard" hidden>
+      <span class="k">Agora</span>
+      <span class="big" id="nowbig"></span>
+      <span class="next" id="nownext"></span>
+    </div>
+    <div class="progress">
+      <div class="top"><span id="ptext"></span><span id="pmsg"></span></div>
+      <div class="bar"><b id="pbar"></b></div>
+    </div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <div class="foot">
+    <p><strong>Regra para começar:</strong> faz só 10 minutos do bloco. Se falhares um, salta e segue para o seguinte.</p>
+    <p>Assumi aulas de manhã das 6h45 às 12h, aulas de tarde das 14h às 17h na segunda e na quinta, e a terça sem aulas (a confirmar). Quarta e sexta: só de manhã.</p>
+  </div>
+</div>
+
+<script>
+const CATS={escola:'Escola',treino:'Treino',estudo:'Estudo',criar:'Criar',casa:'Casa',lazer:'Lazer',rotina:'Rotina'};
+const T=s=>{const p=s.split(':');return +p[0]*60+ +p[1]};
+const pad=n=>String(n).padStart(2,'0');
+const dur=n=>{const h=Math.floor(n/60),m=n%60;return h?(m?h+' h '+pad(m):h+' h'):m+' min'};
+
+const WALK='Caminho para a escola (15 min)';
+const HOME='Caminho para casa (15 min)';
+
+const DAYS=[
+ {abbr:'Seg',name:'Segunda-feira',niche:'E',aulas:'Aulas de manhã e tarde',school:true,train:true,video:'Vídeo empresarial',cook:false,note:'',
+  blocks:[
+   ['04:45','05:00','Acordar e beber água','rotina'],
+   ['05:00','05:20','Treino da manhã','treino'],
+   ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
+   ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
+   ['06:45','12:00','Aulas da manhã','escola'],
+   ['12:00','12:15',HOME,'escola'],
+   ['12:15','13:00','Almoço','casa'],
+   ['13:00','13:45','Descansar','lazer'],
+   ['13:45','14:00','Caminho para a escola (15 min)','escola'],
+   ['14:00','17:00','Aulas da tarde','escola'],
+   ['17:00','17:15',HOME,'escola'],
+   ['17:15','17:45','Lanche e descanso','lazer'],
+   ['17:45','18:45','Vídeo empresarial: gravar, editar, publicar','criar','O roteiro já está escrito desde domingo.'],
+   ['18:45','19:00','Preparar o treino','rotina'],
+   ['19:00','19:20','Treino da noite','treino'],
+   ['19:20','20:00','Banho e jantar','casa'],
+   ['20:00','20:45','Estudar: trabalhos da escola','estudo'],
+   ['20:45','21:15','Jogar','lazer'],
+   ['21:15','21:30','Redes sociais e conversar','lazer'],
+   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
+   ['21:45','','Dormir','rotina','Amanhã acordas às 5h30.']
+  ]},
+ {abbr:'Ter',name:'Terça-feira',niche:'J',aulas:'Sem aulas',school:false,train:false,video:'Vídeo de jogos',cook:false,
+  note:'Sem aulas se o módulo fechar mesmo. Se houver aula, segue o horário de sexta. Dia de manhã forte: o trabalho que dá dinheiro vem primeiro.',
+  blocks:[
+   ['05:30','06:00','Acordar, água e pequeno-almoço','rotina'],
+   ['06:00','08:00','Projetos da BGO e landing pages','criar','Sem encomenda? Estuda web design ou melhora a tua própria landing page.'],
+   ['08:00','08:15','Pausa','lazer'],
+   ['08:15','09:15','Estudar: trabalhos e matéria do módulo','estudo'],
+   ['09:15','09:45','SQL no Coddy','estudo'],
+   ['09:45','10:00','Caminhada curta (opcional)','lazer'],
+   ['10:00','11:00','Tarefas domésticas','casa'],
+   ['11:00','12:00','Livre: jogar','lazer'],
+   ['12:00','13:00','Almoço e descanso','casa'],
+   ['13:00','15:00','Vídeo de jogos: gravar, editar, publicar','criar'],
+   ['15:00','16:00','Jogar e descontrair','lazer'],
+   ['16:00','17:00','Recuperar o que ficou atrasado','estudo','Usa esta hora para o que falhou nos outros dias.'],
+   ['17:00','18:30','Livre: redes sociais, amigos, conversar','lazer'],
+   ['18:30','19:30','Jantar','casa'],
+   ['19:30','21:00','Jogar ou ver um filme','lazer'],
+   ['21:00','21:30','Redes sociais e conversar','lazer'],
+   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
+   ['21:45','','Dormir','rotina','Amanhã acordas às 4h45 para treinar.']
+  ]},
+ {abbr:'Qua',name:'Quarta-feira',niche:'E',aulas:'Aulas de manhã',school:true,train:true,video:'Vídeo empresarial',cook:true,note:'',
+  blocks:[
+   ['04:45','05:00','Acordar e beber água','rotina'],
+   ['05:00','05:20','Treino da manhã','treino'],
+   ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
+   ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
+   ['06:45','12:00','Aulas da manhã','escola'],
+   ['12:00','12:15',HOME,'escola'],
+   ['12:15','13:15','Cozinhar e almoçar','casa'],
+   ['13:15','14:00','Descansar','lazer'],
+   ['14:00','15:00','Estudar: trabalhos da escola','estudo'],
+   ['15:00','15:30','SQL no Coddy','estudo'],
+   ['15:30','15:45','Pausa e caminhada curta (opcional)','lazer'],
+   ['15:45','17:45','Vídeo empresarial: gravar, editar, publicar','criar'],
+   ['17:45','18:45','Projetos da BGO','criar','Se não houver, joga ou descansa.'],
+   ['18:45','19:00','Preparar o treino','rotina'],
+   ['19:00','19:20','Treino da noite','treino'],
+   ['19:20','20:00','Banho e jantar','casa'],
+   ['20:00','20:45','Jogar','lazer'],
+   ['20:45','21:15','Redes sociais e conversar','lazer'],
+   ['21:15','21:30','Tarefas domésticas rápidas','casa'],
+   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
+   ['21:45','','Dormir','rotina','Amanhã acordas às 4h45.']
+  ]},
+ {abbr:'Qui',name:'Quinta-feira',niche:'J',aulas:'Aulas de manhã e tarde',school:true,train:true,video:'Vídeo de jogos',cook:false,note:'',
+  blocks:[
+   ['04:45','05:00','Acordar e beber água','rotina'],
+   ['05:00','05:20','Treino da manhã','treino'],
+   ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
+   ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
+   ['06:45','12:00','Aulas da manhã','escola'],
+   ['12:00','12:15',HOME,'escola'],
+   ['12:15','13:00','Almoço','casa'],
+   ['13:00','13:45','Descansar','lazer'],
+   ['13:45','14:00','Caminho para a escola (15 min)','escola'],
+   ['14:00','17:00','Aulas da tarde','escola'],
+   ['17:00','17:15',HOME,'escola'],
+   ['17:15','17:45','Lanche e descanso','lazer'],
+   ['17:45','18:45','Vídeo de jogos: gravar, editar, publicar','criar'],
+   ['18:45','19:00','Preparar o treino','rotina'],
+   ['19:00','19:20','Treino da noite','treino'],
+   ['19:20','20:00','Banho e jantar','casa'],
+   ['20:00','20:30','Estudar: trabalhos da escola','estudo'],
+   ['20:30','21:00','SQL no Coddy','estudo'],
+   ['21:00','21:30','Jogar, redes sociais e conversar','lazer'],
+   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
+   ['21:45','','Dormir','rotina','Amanhã acordas às 5h30.']
+  ]},
+ {abbr:'Sex',name:'Sexta-feira',niche:'E',aulas:'Aulas de manhã',school:true,train:false,video:'Vídeo empresarial',cook:false,
+  note:'Tarde leve e noite de descontração.',
+  blocks:[
+   ['05:30','06:30','Acordar, banho, pequeno-almoço e mochila','rotina'],
+   ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
+   ['06:45','12:00','Aulas da manhã','escola'],
+   ['12:00','12:15',HOME,'escola'],
+   ['12:15','13:00','Almoço','casa'],
+   ['13:00','13:45','Tarefas domésticas','casa'],
+   ['13:45','14:45','Estudar: trabalhos da escola','estudo'],
+   ['14:45','15:15','SQL no Coddy','estudo'],
+   ['15:15','15:30','Pausa e caminhada curta (opcional)','lazer'],
+   ['15:30','17:30','Vídeo empresarial: gravar, editar, publicar','criar'],
+   ['17:30','18:30','Projetos da BGO','criar','Se não houver, descansa ou joga.'],
+   ['18:30','19:15','Jantar','casa'],
+   ['19:15','21:00','Jogar e descontrair','lazer'],
+   ['21:00','21:45','Redes sociais e conversar','lazer'],
+   ['21:45','22:00','15 min sem ecrã','rotina'],
+   ['22:00','22:15','Preparar para dormir','rotina'],
+   ['22:15','','Dormir','rotina','Amanhã acordas às 6h30.']
+  ]},
+ {abbr:'Sáb',name:'Sábado',niche:'J',aulas:'Sem aulas',school:false,train:true,video:'Vídeo de jogos',cook:false,
+  note:'De manhã estudas game dev e web design; à tarde adiantas a BGO.',
+  blocks:[
+   ['06:30','06:45','Acordar e beber água','rotina'],
+   ['06:45','07:05','Treino da manhã','treino'],
+   ['07:05','07:45','Banho e pequeno-almoço','casa'],
+   ['07:45','09:15','Estudar game dev e web design','estudo'],
+   ['09:15','09:30','Pausa','lazer'],
+   ['09:30','11:00','Vídeo de jogos: gravar, editar, publicar','criar'],
+   ['11:00','12:00','Tarefas domésticas grandes (roupa, limpeza)','casa'],
+   ['12:00','13:00','Almoço','casa'],
+   ['13:00','14:30','Jogar e descansar','lazer'],
+   ['14:30','15:30','Caminhada leve ou sair de casa (opcional)','lazer'],
+   ['15:30','17:00','Projetos da BGO e landing pages','criar'],
+   ['17:00','18:45','Livre: redes sociais, amigos','lazer'],
+   ['18:45','19:00','Preparar o treino','rotina'],
+   ['19:00','19:20','Treino da noite','treino'],
+   ['19:20','20:00','Banho e jantar','casa'],
+   ['20:00','21:45','Jogar ou ver um filme','lazer'],
+   ['21:45','22:00','15 min sem ecrã','rotina'],
+   ['22:00','22:30','Preparar para dormir','rotina'],
+   ['22:30','','Dormir','rotina','Amanhã acordas às 7h.']
+  ]},
+ {abbr:'Dom',name:'Domingo',niche:'P',aulas:'Sem aulas',school:false,train:false,video:'Planear os 6 roteiros da semana',cook:true,
+  note:'Sem vídeo hoje. Escreve os roteiros para que, nos outros dias, só tenhas de gravar.',
+  blocks:[
+   ['07:00','08:00','Acordar e pequeno-almoço','rotina'],
+   ['08:00','09:30','Estudar game dev e web design','estudo'],
+   ['09:30','10:00','SQL no Coddy','estudo'],
+   ['10:00','11:00','Tarefas domésticas e arrumar o quarto','casa'],
+   ['11:00','12:30','Cozinhar','casa','Faz para duas refeições.'],
+   ['12:30','13:30','Almoço e descanso','casa'],
+   ['13:30','15:00','Projetos da BGO','criar','Se não houver, descansa.'],
+   ['15:00','15:20','Revisão da semana: o que fiz, o que falhou','estudo'],
+   ['15:20','16:00','Planear a semana e escrever os 6 roteiros','criar'],
+   ['16:00','17:00','Caminhada leve (opcional)','lazer'],
+   ['17:00','19:00','Livre: jogar, redes sociais, conversar','lazer'],
+   ['19:00','20:00','Jantar','casa'],
+   ['20:00','21:00','Trabalhos pendentes, mochila e roupa de segunda','estudo'],
+   ['21:00','21:15','Redes sociais e conversar','lazer'],
+   ['21:15','21:30','15 min sem ecrã','rotina'],
+   ['21:30','21:45','Preparar para dormir','rotina'],
+   ['21:45','','Dormir','rotina','Segunda acordas às 4h45 para treinar.']
+  ]}
+];
+DAYS.forEach(d=>{d.b=d.blocks.map((x,i,a)=>({s:T(x[0]),e:x[1]?T(x[1]):(i<a.length-1?T(a[i+1][0]):1440),l:x[2],c:x[3],n:x[4]||'',st:x[0],et:x[1]||''}))});
+
+const todayIdx=(new Date().getDay()+6)%7;
+let sel=todayIdx;
+const state={};
+const keyFor=i=>{const t=new Date();const d=new Date(t.getFullYear(),t.getMonth(),t.getDate()-((t.getDay()+6)%7)+i);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+function getDone(i){
+  const k=keyFor(i);
+  if(!state[k]){let v=[];try{v=JSON.parse(localStorage.getItem('rotina-ei5a:'+k)||'[]')}catch(e){}state[k]=Array.isArray(v)?v:[]}
+  return state[k];
+}
+function saveDone(i){try{localStorage.setItem('rotina-ei5a:'+keyFor(i),JSON.stringify(getDone(i)))}catch(e){}}
+
+const $=id=>document.getElementById(id);
+const CHECK='<svg viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5l2.2 2.2L9.5 3.5"/></svg>';
+
+function renderTabs(){
+  $('tabs').innerHTML=DAYS.map((d,i)=>
+    '<button class="tab'+(i===todayIdx?' today':'')+'" role="tab" data-i="'+i+'" aria-selected="'+(i===sel)+'" aria-label="'+d.name+'">'+
+    '<span class="d">'+d.abbr+'</span><span class="n">'+d.niche+'</span>'+
+    '<span class="dots"><i style="background:'+(d.school?'var(--escola)':'transparent')+'"></i><i style="background:'+(d.train?'var(--treino)':'transparent')+'"></i></span></button>'
+  ).join('');
+}
+function renderDay(){
+  const d=DAYS[sel];
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(+t.dataset.i===sel)));
+  $('dayname').textContent=d.name+(sel===todayIdx?' (hoje)':'');
+  const chips=[];
+  chips.push([d.aulas,d.school?'var(--escola)':'var(--rotina)']);
+  if(d.train)chips.push(['Treino de manhã e à noite','var(--treino)']);
+  chips.push([d.niche==='P'?d.video:'Vídeo: '+d.video.replace('Vídeo ',''),'var(--criar)']);
+  if(d.cook)chips.push(['Cozinhar','var(--casa)']);
+  $('chips').innerHTML=chips.map(c=>'<span class="chip" style="--c:'+c[1]+'"><i></i>'+c[0]+'</span>').join('');
+  const nt=$('daynote');nt.textContent=d.note;nt.hidden=!d.note;
+  const done=getDone(sel);
+  $('list').innerHTML=d.b.map((b,i)=>{
+    const last=i===d.b.length-1;
+    const time=b.st;
+    const meta='<b>'+CATS[b.c]+'</b>'+(last?'':' · '+dur(b.e-b.s)+' · até '+b.et);
+    const inner=
+      '<span class="time">'+time+'</span>'+
+      '<span class="rail"><span class="dot"></span></span>'+
+      '<span><span class="lbl">'+b.l+'<span class="tag" hidden>agora</span></span><div class="meta">'+meta+'</div>'+(b.n?'<div class="sub">'+b.n+'</div>':'')+'</span>'+
+      (last?'<span></span>':'<span class="check" aria-hidden="true">'+CHECK+'</span>');
+    if(last)return '<li><div class="row static" style="--c:var(--'+b.c+')" data-i="'+i+'">'+inner+'</div></li>';
+    return '<li><button class="row'+(done.includes(i)?' done':'')+'" style="--c:var(--'+b.c+')" data-i="'+i+'" aria-pressed="'+done.includes(i)+'">'+inner+'</button></li>';
+  }).join('');
+  updateProgress();markNow();
+}
+function updateProgress(){
+  const d=DAYS[sel],total=d.b.length-1,n=getDone(sel).filter(i=>i<total).length;
+  $('ptext').textContent=n+' de '+total+' blocos feitos';
+  $('pbar').style.width=(n/total*100)+'%';
+  $('pmsg').textContent=n>=3?'Já é um bom dia.':'Começa com 10 minutos.';
+}
+function markNow(){
+  const rows=document.querySelectorAll('.row');
+  rows.forEach(r=>{r.classList.remove('now');const t=r.querySelector('.tag');if(t)t.hidden=true});
+  const card=$('nowcard');
+  if(sel!==todayIdx){card.hidden=true;return}
+  const d=DAYS[sel],now=new Date(),m=now.getHours()*60+now.getMinutes();
+  let idx=d.b.findIndex(b=>m>=b.s&&m<b.e);
+  if(idx<0)idx=d.b.length-1;
+  const b=d.b[idx],nx=d.b[idx+1];
+  const r=document.querySelector('.row[data-i="'+idx+'"]');
+  if(r){r.classList.add('now');const t=r.querySelector('.tag');if(t)t.hidden=false}
+  card.hidden=false;
+  $('nowbig').textContent=b.l;
+  $('nownext').textContent=nx?'A seguir, às '+nx.st+': '+nx.l:'Descansa. O dia seguinte começa cedo.';
+}
+$('tabs').addEventListener('click',e=>{const t=e.target.closest('.tab');if(!t)return;sel=+t.dataset.i;renderDay()});
+$('list').addEventListener('click',e=>{
+  const r=e.target.closest('button.row');if(!r)return;
+  const i=+r.dataset.i,done=getDone(sel),k=done.indexOf(i);
+  if(k>=0)done.splice(k,1);else done.push(i);
+  r.classList.toggle('done',k<0);r.setAttribute('aria-pressed',String(k<0));
+  saveDone(sel);updateProgress();
+});
+renderTabs();renderDay();
+setInterval(markNow,60000);
+</script>
+
+</body></html>
