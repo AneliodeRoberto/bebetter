@@ -137,7 +137,7 @@ li:last-child .rail::before{bottom:auto;height:16px}
 
   <div class="foot">
     <p><strong>Regra para começar:</strong> faz só 10 minutos do bloco. Se falhares um, salta e segue para o seguinte.</p>
-    <p>Assumi aulas de manhã das 6h45 às 12h, aulas de tarde das 14h às 17h na segunda e na quinta, e a terça sem aulas (a confirmar). Quarta e sexta: só de manhã.</p>
+    <p>Aulas de manhã das 6h45 às 12h. Aulas de tarde das 14h às 17h na segunda e na quinta; na terça só se o módulo não fechar. Treinos seguem o teu plano de 4 semanas: segunda, terça, quinta e sábado, com descanso na quarta, sexta e domingo.</p>
   </div>
 </div>
 
@@ -149,59 +149,63 @@ const dur=n=>{const h=Math.floor(n/60),m=n%60;return h?(m?h+' h '+pad(m):h+' h')
 
 const WALK='Caminho para a escola (15 min)';
 const HOME='Caminho para casa (15 min)';
+const AM=(l,n)=>['05:00','05:20','Treino da manhã: '+l,'treino','Aquecimento de 5 min, depois '+n];
+const PM=(l,n)=>['19:00','19:20','Treino da noite: '+l,'treino','Aquecimento de 5 min, depois '+n];
 
 const DAYS=[
- {abbr:'Seg',name:'Segunda-feira',niche:'E',aulas:'Aulas de manhã e tarde',school:true,train:true,video:'Vídeo empresarial',cook:false,note:'',
+ {abbr:'Seg',name:'Segunda-feira',niche:'E',aulas:'Aulas de manhã e tarde',school:true,train:true,focus:'peito, ombros e tríceps',video:'Vídeo empresarial',cook:false,note:'',
   blocks:[
    ['04:45','05:00','Acordar e beber água','rotina'],
-   ['05:00','05:20','Treino da manhã','treino'],
+   AM('peito e tríceps','flexões com pés na cadeira 4×8–12 e flexões diamante 3×10–12.'),
    ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
    ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
    ['06:45','12:00','Aulas da manhã','escola'],
    ['12:00','12:15',HOME,'escola'],
    ['12:15','13:00','Almoço','casa'],
    ['13:00','13:45','Descansar','lazer'],
-   ['13:45','14:00','Caminho para a escola (15 min)','escola'],
+   ['13:45','14:00',WALK,'escola'],
    ['14:00','17:00','Aulas da tarde','escola'],
    ['17:00','17:15',HOME,'escola'],
    ['17:15','17:45','Lanche e descanso','lazer'],
    ['17:45','18:45','Vídeo empresarial: gravar, editar, publicar','criar','O roteiro já está escrito desde domingo.'],
    ['18:45','19:00','Preparar o treino','rotina'],
-   ['19:00','19:20','Treino da noite','treino'],
+   PM('ombros e tríceps','pike push-ups 3×8–10 e mergulhos em 2 cadeiras 3×8–12.'),
    ['19:20','20:00','Banho e jantar','casa'],
    ['20:00','20:45','Estudar: trabalhos da escola','estudo'],
    ['20:45','21:15','Jogar','lazer'],
    ['21:15','21:30','Redes sociais e conversar','lazer'],
    ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
-   ['21:45','','Dormir','rotina','Amanhã acordas às 5h30.']
-  ]},
- {abbr:'Ter',name:'Terça-feira',niche:'J',aulas:'Sem aulas',school:false,train:false,video:'Vídeo de jogos',cook:false,
-  note:'Sem aulas se o módulo fechar mesmo. Se houver aula, segue o horário de sexta. Dia de manhã forte: o trabalho que dá dinheiro vem primeiro.',
-  blocks:[
-   ['05:30','06:00','Acordar, água e pequeno-almoço','rotina'],
-   ['06:00','08:00','Projetos da BGO e landing pages','criar','Sem encomenda? Estuda web design ou melhora a tua própria landing page.'],
-   ['08:00','08:15','Pausa','lazer'],
-   ['08:15','09:15','Estudar: trabalhos e matéria do módulo','estudo'],
-   ['09:15','09:45','SQL no Coddy','estudo'],
-   ['09:45','10:00','Caminhada curta (opcional)','lazer'],
-   ['10:00','11:00','Tarefas domésticas','casa'],
-   ['11:00','12:00','Livre: jogar','lazer'],
-   ['12:00','13:00','Almoço e descanso','casa'],
-   ['13:00','15:00','Vídeo de jogos: gravar, editar, publicar','criar'],
-   ['15:00','16:00','Jogar e descontrair','lazer'],
-   ['16:00','17:00','Recuperar o que ficou atrasado','estudo','Usa esta hora para o que falhou nos outros dias.'],
-   ['17:00','18:30','Livre: redes sociais, amigos, conversar','lazer'],
-   ['18:30','19:30','Jantar','casa'],
-   ['19:30','21:00','Jogar ou ver um filme','lazer'],
-   ['21:00','21:30','Redes sociais e conversar','lazer'],
-   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
    ['21:45','','Dormir','rotina','Amanhã acordas às 4h45 para treinar.']
   ]},
- {abbr:'Qua',name:'Quarta-feira',niche:'E',aulas:'Aulas de manhã',school:true,train:true,video:'Vídeo empresarial',cook:true,note:'',
+ {abbr:'Ter',name:'Terça-feira',niche:'J',aulas:'Aulas de manhã',school:true,train:true,focus:'core e abdominais',video:'Vídeo de jogos',cook:false,
+  note:'Sem aulas à tarde se o módulo fechar. Se não fechar e houver aula (14h às 17h), segue o horário de segunda a partir do almoço.',
   blocks:[
    ['04:45','05:00','Acordar e beber água','rotina'],
-   ['05:00','05:20','Treino da manhã','treino'],
+   AM('core','elevação de pernas 4×10–15 e hollow body hold 4×20–30 s.'),
    ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
+   ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
+   ['06:45','12:00','Aulas da manhã','escola'],
+   ['12:00','12:15',HOME,'escola'],
+   ['12:15','13:00','Almoço','casa'],
+   ['13:00','13:45','Descansar','lazer'],
+   ['13:45','15:45','Vídeo de jogos: gravar, editar, publicar','criar'],
+   ['15:45','16:00','Pausa','lazer'],
+   ['16:00','17:00','Estudar: trabalhos e matéria do módulo','estudo'],
+   ['17:00','17:30','SQL no Coddy','estudo'],
+   ['17:30','18:45','Projetos da BGO e landing pages','criar','Sem encomenda? Estuda web design ou melhora a tua landing page.'],
+   ['18:45','19:00','Preparar o treino','rotina'],
+   PM('core','prancha lateral 3×30 s e mountain climbers 3×30 s.'),
+   ['19:20','20:00','Banho e jantar','casa'],
+   ['20:00','20:45','Jogar','lazer'],
+   ['20:45','21:15','Redes sociais e conversar','lazer'],
+   ['21:15','21:30','Tarefas domésticas rápidas','casa'],
+   ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
+   ['21:45','','Dormir','rotina','Amanhã é dia de descanso do treino: acordas às 5h30.']
+  ]},
+ {abbr:'Qua',name:'Quarta-feira',niche:'E',aulas:'Aulas de manhã',school:true,train:false,video:'Vídeo empresarial',cook:true,
+  note:'Dia de descanso do treino. Aproveita para dormir bem e recuperar.',
+  blocks:[
+   ['05:30','06:30','Acordar, banho, pequeno-almoço e mochila','rotina'],
    ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
    ['06:45','12:00','Aulas da manhã','escola'],
    ['12:00','12:15',HOME,'escola'],
@@ -212,41 +216,39 @@ const DAYS=[
    ['15:30','15:45','Pausa e caminhada curta (opcional)','lazer'],
    ['15:45','17:45','Vídeo empresarial: gravar, editar, publicar','criar'],
    ['17:45','18:45','Projetos da BGO','criar','Se não houver, joga ou descansa.'],
-   ['18:45','19:00','Preparar o treino','rotina'],
-   ['19:00','19:20','Treino da noite','treino'],
-   ['19:20','20:00','Banho e jantar','casa'],
-   ['20:00','20:45','Jogar','lazer'],
-   ['20:45','21:15','Redes sociais e conversar','lazer'],
-   ['21:15','21:30','Tarefas domésticas rápidas','casa'],
+   ['18:45','19:30','Jantar','casa'],
+   ['19:30','20:30','Jogar','lazer'],
+   ['20:30','21:00','Tarefas domésticas','casa'],
+   ['21:00','21:30','Redes sociais e conversar','lazer'],
    ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
-   ['21:45','','Dormir','rotina','Amanhã acordas às 4h45.']
+   ['21:45','','Dormir','rotina','Amanhã acordas às 4h45 para treinar.']
   ]},
- {abbr:'Qui',name:'Quinta-feira',niche:'J',aulas:'Aulas de manhã e tarde',school:true,train:true,video:'Vídeo de jogos',cook:false,note:'',
+ {abbr:'Qui',name:'Quinta-feira',niche:'J',aulas:'Aulas de manhã e tarde',school:true,train:true,focus:'costas e bíceps',video:'Vídeo de jogos',cook:false,note:'',
   blocks:[
    ['04:45','05:00','Acordar e beber água','rotina'],
-   ['05:00','05:20','Treino da manhã','treino'],
+   AM('costas','remada debaixo da mesa 4×8–12 e remada com mochila 3×12.'),
    ['05:20','06:30','Banho, vestir, pequeno-almoço e mochila','rotina'],
    ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
    ['06:45','12:00','Aulas da manhã','escola'],
    ['12:00','12:15',HOME,'escola'],
    ['12:15','13:00','Almoço','casa'],
    ['13:00','13:45','Descansar','lazer'],
-   ['13:45','14:00','Caminho para a escola (15 min)','escola'],
+   ['13:45','14:00',WALK,'escola'],
    ['14:00','17:00','Aulas da tarde','escola'],
    ['17:00','17:15',HOME,'escola'],
    ['17:15','17:45','Lanche e descanso','lazer'],
    ['17:45','18:45','Vídeo de jogos: gravar, editar, publicar','criar'],
    ['18:45','19:00','Preparar o treino','rotina'],
-   ['19:00','19:20','Treino da noite','treino'],
+   PM('costas e bíceps','superman hold 3×20 s e curl com mochila 3×12.'),
    ['19:20','20:00','Banho e jantar','casa'],
    ['20:00','20:30','Estudar: trabalhos da escola','estudo'],
    ['20:30','21:00','SQL no Coddy','estudo'],
    ['21:00','21:30','Jogar, redes sociais e conversar','lazer'],
    ['21:30','21:45','15 min sem ecrã e mochila','rotina'],
-   ['21:45','','Dormir','rotina','Amanhã acordas às 5h30.']
+   ['21:45','','Dormir','rotina','Amanhã é dia de descanso do treino: acordas às 5h30.']
   ]},
  {abbr:'Sex',name:'Sexta-feira',niche:'E',aulas:'Aulas de manhã',school:true,train:false,video:'Vídeo empresarial',cook:false,
-  note:'Tarde leve e noite de descontração.',
+  note:'Dia de descanso do treino, tarde leve e noite de descontração.',
   blocks:[
    ['05:30','06:30','Acordar, banho, pequeno-almoço e mochila','rotina'],
    ['06:30','06:45',WALK,'escola','Chegas às 6h45.'],
@@ -264,13 +266,13 @@ const DAYS=[
    ['21:00','21:45','Redes sociais e conversar','lazer'],
    ['21:45','22:00','15 min sem ecrã','rotina'],
    ['22:00','22:15','Preparar para dormir','rotina'],
-   ['22:15','','Dormir','rotina','Amanhã acordas às 6h30.']
+   ['22:15','','Dormir','rotina','Amanhã acordas às 6h30 para treinar.']
   ]},
- {abbr:'Sáb',name:'Sábado',niche:'J',aulas:'Sem aulas',school:false,train:true,video:'Vídeo de jogos',cook:false,
+ {abbr:'Sáb',name:'Sábado',niche:'J',aulas:'Sem aulas',school:false,train:true,focus:'pernas e core',video:'Vídeo de jogos',cook:false,
   note:'De manhã estudas game dev e web design; à tarde adiantas a BGO.',
   blocks:[
    ['06:30','06:45','Acordar e beber água','rotina'],
-   ['06:45','07:05','Treino da manhã','treino'],
+   ['06:45','07:05','Treino da manhã: pernas','treino','Aquecimento de 5 min, depois agachamento búlgaro 3×10 e agachamento com salto 3×12.'],
    ['07:05','07:45','Banho e pequeno-almoço','casa'],
    ['07:45','09:15','Estudar game dev e web design','estudo'],
    ['09:15','09:30','Pausa','lazer'],
@@ -282,7 +284,7 @@ const DAYS=[
    ['15:30','17:00','Projetos da BGO e landing pages','criar'],
    ['17:00','18:45','Livre: redes sociais, amigos','lazer'],
    ['18:45','19:00','Preparar o treino','rotina'],
-   ['19:00','19:20','Treino da noite','treino'],
+   PM('pernas e core','gémeos num degrau 4×15–20 e prancha 3×40 s.'),
    ['19:20','20:00','Banho e jantar','casa'],
    ['20:00','21:45','Jogar ou ver um filme','lazer'],
    ['21:45','22:00','15 min sem ecrã','rotina'],
@@ -290,7 +292,7 @@ const DAYS=[
    ['22:30','','Dormir','rotina','Amanhã acordas às 7h.']
   ]},
  {abbr:'Dom',name:'Domingo',niche:'P',aulas:'Sem aulas',school:false,train:false,video:'Planear os 6 roteiros da semana',cook:true,
-  note:'Sem vídeo hoje. Escreve os roteiros para que, nos outros dias, só tenhas de gravar.',
+  note:'Dia de descanso do treino. Sem vídeo hoje: escreve os roteiros para que, nos outros dias, só tenhas de gravar.',
   blocks:[
    ['07:00','08:00','Acordar e pequeno-almoço','rotina'],
    ['08:00','09:30','Estudar game dev e web design','estudo'],
@@ -340,7 +342,7 @@ function renderDay(){
   $('dayname').textContent=d.name+(sel===todayIdx?' (hoje)':'');
   const chips=[];
   chips.push([d.aulas,d.school?'var(--escola)':'var(--rotina)']);
-  if(d.train)chips.push(['Treino de manhã e à noite','var(--treino)']);
+  if(d.train)chips.push(['Treino: '+d.focus,'var(--treino)']);
   chips.push([d.niche==='P'?d.video:'Vídeo: '+d.video.replace('Vídeo ',''),'var(--criar)']);
   if(d.cook)chips.push(['Cozinhar','var(--casa)']);
   $('chips').innerHTML=chips.map(c=>'<span class="chip" style="--c:'+c[1]+'"><i></i>'+c[0]+'</span>').join('');
